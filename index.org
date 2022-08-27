@@ -6,6 +6,9 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
 #+begin_export html
 <figure>
   <canvas id="output" width="1000" height="1000" />
+  <br/>Yellow in range: <output id="in-range-yellow" />
+  <br/>Red in range: <output id="in-range-red" />
+  <br/>Green in range: <output id="in-range-red" />
   <figcaption>Particle simulation</figcaption>
 </figure>
 #+end_export
