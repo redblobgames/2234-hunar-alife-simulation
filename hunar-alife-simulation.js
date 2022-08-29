@@ -1,18 +1,14 @@
 /*
  * From https://www.redblobgames.com/x/2234-hunar-alife-simulation/
- * Based on tutorial https://www.youtube.com/watch?v=0Kx4Y9TVMGg
+ * Copyright 2022 Red Blob Games <redblobgames@gmail.com>
+ * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>
+ * Some code based on https://www.youtube.com/watch?v=0Kx4Y9TVMGg
  */
 'use strict';
-
 
 const WIDTH = 500,
       HEIGHT = 500;
 const MARGIN = 50; // start particles out this far from the walls
-
-const canvas = document.querySelector("#output");
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
-const ctx = canvas.getContext('2d');
 
 const sliderRanges = { // should be [low, initial, high]
     friction:      [10, 50, 100],
@@ -184,7 +180,7 @@ function randomParameters() {
     }
 }
 
-function update() {
+function simulate() {
     readSliders();
     number(yellow, parameters.yellow_count);
     number(red,    parameters.red_count);
@@ -206,31 +202,25 @@ function update() {
     rule(blue   , red,    parameters.blue_red);
     rule(blue   , green,  parameters.blue_green);
     rule(blue   , blue,   parameters.blue_blue);
-    
-    const R = 2;
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+}
 
-    function draw(particles, color) {
-        // This could be faster if set set the pixels directly instead
-        // of using fillRect, but the bottleneck is the O(N^2)
-        // calculation, not the O(N) drawing.
-        ctx.fillStyle = color;
-        for (let i = 0; i < particles.length; i++) {
-            ctx.fillRect(particles[i].x-R, particles[i].y-R, R*2, R*2);
-        }
-    }
-    draw(yellow, "hsl(60, 100%, 75%)");
-    draw(red, "hsl(0, 100%, 50%)");
-    draw(green, "hsl(110, 100%, 40%)");
-    draw(blue, "hsl(230, 100%, 70%)");
+function update() {
+    simulate();
+    draw();
     requestAnimationFrame(update);
+}
+
+function init() {
+    initializeOutput(WIDTH, HEIGHT);
+    createSliders();
+    ruleset3();
+    update();
 }
 
 let yellow = [];
 let red = [];
 let green = [];
 let blue = [];
-createSliders();
-ruleset3();
-update();
+
+window.onload = init;
+
