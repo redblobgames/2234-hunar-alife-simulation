@@ -14,18 +14,18 @@ canvas.height = HEIGHT;
 const ctx = canvas.getContext('2d');
 
 const sliderRanges = { // should be [low, initial, high]
-    red_count:     [0, 200, 1000],
-    green_count:   [0, 200, 1000],
     yellow_count:  [0, 200, 1000],
-    green_green:   [-100, 0, 100],
-    green_red:     [-100, 0, 100],
-    green_yellow:  [-100, 0, 100],
-    red_red:       [-100, 0, 100],
-    red_green:     [-100, 0, 100],
-    red_yellow:    [-100, 0, 100],
+    green_count:   [0, 200, 1000],
+    red_count:     [0, 200, 1000],
     yellow_yellow: [-100, 0, 100],
     yellow_green:  [-100, 0, 100],
     yellow_red:    [-100, 0, 100],
+    red_red:       [-100, 0, 100],
+    red_green:     [-100, 0, 100],
+    red_yellow:    [-100, 0, 100],
+    green_green:   [-100, 0, 100],
+    green_red:     [-100, 0, 100],
+    green_yellow:  [-100, 0, 100],
 };
 let sliders = {}; // pointers to the <input> and <output> elements
 let parameters = {}; // set from sliders
@@ -139,6 +139,23 @@ function ruleset2() {
     });
 }
 
+function ruleset3() {
+    setSliders({
+        yellow_count: 450,
+        red_count: 200,
+        green_count: 300,
+        yellow_yellow: -2,
+        yellow_red: -10,
+        yellow_green: 10,
+        red_red: 15,
+        red_yellow: -20,
+        red_green: 30,
+        green_yellow: 25,
+        green_red: -15,
+        green_green: -40,
+    });
+}
+        
 function randomParameters() {
     setSliders({
         yellow_count:  randomInt(100, 400),
@@ -191,5 +208,5 @@ let yellow = [];
 let red = [];
 let green = [];
 createSliders();
-ruleset1();
+ruleset3();
 update();
