@@ -4,6 +4,7 @@
  */
 'use strict';
 
+
 const WIDTH = 500,
       HEIGHT = 500;
 const MARGIN = 50; // start particles out this far from the walls
@@ -14,7 +15,7 @@ canvas.height = HEIGHT;
 const ctx = canvas.getContext('2d');
 
 const sliderRanges = { // should be [low, initial, high]
-    energy:         [0, 50, 99],
+    friction:      [10, 50, 100],
     yellow_count:  [0, 200, 1000],
     red_count:     [0, 200, 1000],
     green_count:   [0, 200, 1000],
@@ -89,8 +90,8 @@ function number(particles, count) {
 }
 
 function rule(particles1, particles2, G) {
-    const energy = parameters.energy / 100;
-    let g = -G/100;
+    const friction = parameters.friction / 100;
+    let g = -G/200;
     const MAX_DISTANCE = 80;
     for (let i = 0; i < particles1.length; i++) {
         let fx = 0,
@@ -108,8 +109,10 @@ function rule(particles1, particles2, G) {
             }
         }
 
-        a.vx = a.vx * (0.99 - energy) + fx * energy;
-        a.vy = a.vy * (0.99 - energy) + fy * energy;
+        a.vx *= 1 - friction;
+        a.vy *= 1 - friction;
+        a.vx += fx;
+        a.vy += fy
         a.x += a.vx;
         a.y += a.vy;
 
@@ -122,7 +125,7 @@ function rule(particles1, particles2, G) {
 
 function ruleset1() {
     setSliders({
-        energy        : 50,
+        friction      : 50,
         yellow_count  : 200,
         red_count     : 200,
         green_count   : 200,
@@ -139,7 +142,7 @@ function ruleset1() {
 
 function ruleset2() {
     setSliders({
-        energy        : 50,
+        friction      : 50,
         yellow_count  : 200,
         red_count     : 200,
         green_count   : 200,
@@ -155,7 +158,7 @@ function ruleset2() {
 
 function ruleset3() {
     setSliders({
-        energy        : 50,
+        friction      : 50,
         yellow_count  : 450,
         red_count     : 200,
         green_count   : 300,
@@ -177,7 +180,6 @@ function randomParameters() {
         let value = randomInt(sliderRanges[key][0], sliderRanges[key][2]);
         // special cases, pushing towards values I think are better:
         if (key.endsWith('count')) value = Math.floor(Math.sqrt(randomPos(10, 100000)));
-        if (key === 'energy') value = randomInt(1, 50);
         input.value = value;
     }
 }
