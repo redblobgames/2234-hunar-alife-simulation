@@ -88,11 +88,6 @@ function ruleset2() {
 function update() {
     ruleset1();
     
-    const inRange = (p) => 0 <= p.x && p.x < WIDTH && 0 <= p.y && p.y < HEIGHT;
-    document.querySelector("#in-range-yellow").innerText = yellow.filter(inRange).length;
-    document.querySelector("#in-range-red").innerText = red.filter(inRange).length;
-    document.querySelector("#in-range-green").innerText = green.filter(inRange).length;
-
     const R = 2;
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
