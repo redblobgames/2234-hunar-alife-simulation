@@ -6,35 +6,28 @@
 
 const WIDTH = 500,
       HEIGHT = 500;
+const MARGIN = 50; // start particles out this far from the walls
 
 const canvas = document.querySelector("#output");
 canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const ctx = canvas.getContext('2d');
 
-function draw(x, y, color, s) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, s, s);
-}
-
-let particles = [];
-function particle(x, y, color) {
-    return {x, y, vx: 0, vy: 0, color};
-}
-
 function randomPos(lo, hi) {
     return Math.random() * (hi-lo) + lo;
 }
 
-function create(count, color) {
-    const margin = 50;
-    let group = [];
-    for (let i = 0; i < count; i++) {
-        let p = particle(randomPos(margin, WIDTH-margin), randomPos(margin, HEIGHT-margin), color);
-        group.push(p);
+function number(particles, count) {
+    particles.splice(count);
+    for (let i = particles.length; i < count; i++) {
+        let p = {
+            x: randomPos(MARGIN, WIDTH-MARGIN),
+            y: randomPos(MARGIN, HEIGHT-MARGIN),
+            vx: 0,
+            vy: 0,
+        };
         particles.push(p);
     }
-    return group;
 }
 
 function rule(particles1, particles2, g) {
@@ -67,23 +60,10 @@ function rule(particles1, particles2, g) {
     }
 }
 
-function update() {
-    rule(green, green, -0.32);
-    rule(green, red, -0.17);
-    rule(green, yellow, 0.34);
-    rule(red, red, -0.10);
-    rule(red, green, -0.34);
-    rule(yellow, yellow, 0.15);
-    rule(yellow, green, -0.20);
-    /*
-    rule(red, red, 0.1);
-    rule(yellow, red, 0.15);
-    rule(green, green, -0.7);
-    rule(green, red, -0.2);
-    rule(red, green, -0.1);
-    rule(yellow, yellow, 0.01);
-    */
-    /*
+function ruleset1() {
+    number(yellow, 200);
+    number(red, 200);
+    number(green, 200);
     rule(green, green, -0.32)
     rule(green, red, -0.17)
     rule(green, yellow, 0.34)
@@ -91,7 +71,22 @@ function update() {
     rule(red, green, -0.34)
     rule(yellow, yellow, 0.15)
     rule(yellow, green, -0.20)
-    */
+}
+
+function ruleset2() {
+    number(yellow, 200);
+    number(red, 200);
+    number(green, 200);
+    rule(red, red, 0.1);
+    rule(yellow, red, 0.15);
+    rule(green, green, -0.7);
+    rule(green, red, -0.2);
+    rule(red, green, -0.1);
+    rule(yellow, yellow, 0.01);
+}
+
+function update() {
+    ruleset1();
     
     const inRange = (p) => 0 <= p.x && p.x < WIDTH && 0 <= p.y && p.y < HEIGHT;
     document.querySelector("#in-range-yellow").innerText = yellow.filter(inRange).length;
@@ -101,13 +96,20 @@ function update() {
     const R = 2;
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    for (let i = 0; i < particles.length; i++) {
-        draw(particles[i].x-R, particles[i].y-R, particles[i].color, R*2);
+
+    function draw(particles, color) {
+        ctx.fillStyle = color;
+        for (let i = 0; i < particles.length; i++) {
+            ctx.fillRect(particles[i].x-R, particles[i].y-R, R*2, R*2);
+        }
     }
+    draw(yellow, "yellow");
+    draw(red, "red");
+    draw(green, "green");
     requestAnimationFrame(update);
 }
 
-let yellow = create(200, "yellow")
-let red = create(200, "red")
-let green = create(200, "green")
+let yellow = [];
+let red = [];
+let green = [];
 update();
