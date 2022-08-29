@@ -14,18 +14,27 @@ canvas.height = HEIGHT;
 const ctx = canvas.getContext('2d');
 
 const sliderRanges = { // should be [low, initial, high]
+    energy:         [0, 50, 99],
     yellow_count:  [0, 200, 1000],
-    green_count:   [0, 200, 1000],
     red_count:     [0, 200, 1000],
+    green_count:   [0, 200, 1000],
+    blue_count:    [0, 200, 1000],
     yellow_yellow: [-100, 0, 100],
-    yellow_green:  [-100, 0, 100],
     yellow_red:    [-100, 0, 100],
+    yellow_green:  [-100, 0, 100],
+    yellow_blue:   [-100, 0, 100],
+    red_yellow:    [-100, 0, 100],
     red_red:       [-100, 0, 100],
     red_green:     [-100, 0, 100],
-    red_yellow:    [-100, 0, 100],
-    green_green:   [-100, 0, 100],
-    green_red:     [-100, 0, 100],
+    red_blue:      [-100, 0, 100],
     green_yellow:  [-100, 0, 100],
+    green_red:     [-100, 0, 100],
+    green_green:   [-100, 0, 100],
+    green_blue:    [-100, 0, 100],
+    blue_yellow:   [-100, 0, 100],
+    blue_red:      [-100, 0, 100],
+    blue_green:    [-100, 0, 100],
+    blue_blue:     [-100, 0, 100],
 };
 let sliders = {}; // pointers to the <input> and <output> elements
 let parameters = {}; // set from sliders
@@ -80,6 +89,7 @@ function number(particles, count) {
 }
 
 function rule(particles1, particles2, G) {
+    const energy = parameters.energy / 100;
     let g = -G/100;
     const MAX_DISTANCE = 80;
     for (let i = 0; i < particles1.length; i++) {
@@ -97,9 +107,9 @@ function rule(particles1, particles2, G) {
                 fy += F * dy;
             }
         }
-        
-        a.vx = (a.vx + fx) * 0.5;
-        a.vy = (a.vy + fy) * 0.5;
+
+        a.vx = a.vx * (0.99 - energy) + fx * energy;
+        a.vy = a.vy * (0.99 - energy) + fy * energy;
         a.x += a.vx;
         a.y += a.vy;
 
@@ -112,9 +122,11 @@ function rule(particles1, particles2, G) {
 
 function ruleset1() {
     setSliders({
+        energy        : 50,
         yellow_count  : 200,
         red_count     : 200,
         green_count   : 200,
+        blue_count    : 0,
         yellow_yellow : -15,
         yellow_green  : 20,
         red_red       : 10,
@@ -127,9 +139,11 @@ function ruleset1() {
 
 function ruleset2() {
     setSliders({
+        energy        : 50,
         yellow_count  : 200,
         red_count     : 200,
         green_count   : 200,
+        blue_count    : 0,
         yellow_yellow : -1,
         yellow_red    : -15,
         red_red       : -10,
@@ -141,72 +155,80 @@ function ruleset2() {
 
 function ruleset3() {
     setSliders({
-        yellow_count: 450,
-        red_count: 200,
-        green_count: 300,
-        yellow_yellow: -2,
-        yellow_red: -10,
-        yellow_green: 10,
-        red_red: 15,
-        red_yellow: -20,
-        red_green: 30,
-        green_yellow: 25,
-        green_red: -15,
-        green_green: -40,
+        energy        : 50,
+        yellow_count  : 450,
+        red_count     : 200,
+        green_count   : 300,
+        blue_count    : 0,
+        yellow_yellow : -2,
+        yellow_red    : -10,
+        yellow_green  : 10,
+        red_red       : 15,
+        red_yellow    : -20,
+        red_green     : 30,
+        green_yellow  : 25,
+        green_red     : -15,
+        green_green   : -40,
     });
 }
         
 function randomParameters() {
-    setSliders({
-        yellow_count:  randomInt(100, 400),
-        red_count:     randomInt(100, 400),
-        green_count:   randomInt(100, 400),
-        yellow_yellow: randomInt(-50, 50),
-        yellow_red:    randomInt(-50, 50),
-        yellow_green:  randomInt(-50, 50),
-        red_yellow:    randomInt(-50, 50),
-        red_red:       randomInt(-50, 50),
-        red_green:     randomInt(-50, 50),
-        green_yellow:  randomInt(-50, 50),
-        green_red:     randomInt(-50, 50),
-        green_green:   randomInt(-50, 50),
-    });
+    for (let [key, [input, _]] of Object.entries(sliders)) {
+        let value = randomInt(sliderRanges[key][0], sliderRanges[key][2]);
+        // special cases, pushing towards values I think are better:
+        if (key.endsWith('count')) value = Math.floor(Math.sqrt(randomPos(10, 100000)));
+        if (key === 'energy') value = randomInt(1, 50);
+        input.value = value;
+    }
 }
 
 function update() {
     readSliders();
     number(yellow, parameters.yellow_count);
-    number(red, parameters.red_count);
-    number(green, parameters.green_count);
+    number(red,    parameters.red_count);
+    number(green,  parameters.green_count);
+    number(blue,   parameters.blue_count);
     rule(yellow , yellow, parameters.yellow_yellow);
     rule(yellow , red,    parameters.yellow_red);
     rule(yellow , green,  parameters.yellow_green);
+    rule(yellow , blue,   parameters.yellow_blue);
     rule(red    , yellow, parameters.red_yellow);
     rule(red    , red,    parameters.red_red);
     rule(red    , green,  parameters.red_green);
+    rule(red    , blue,   parameters.red_blue);
     rule(green  , yellow, parameters.green_yellow);
     rule(green  , red,    parameters.green_red);
     rule(green  , green,  parameters.green_green);
+    rule(green  , blue,   parameters.green_blue);
+    rule(blue   , yellow, parameters.blue_yellow);
+    rule(blue   , red,    parameters.blue_red);
+    rule(blue   , green,  parameters.blue_green);
+    rule(blue   , blue,   parameters.blue_blue);
     
     const R = 2;
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     function draw(particles, color) {
+        // This could be faster if set set the pixels directly instead
+        // of using fillRect, but the bottleneck is the O(N^2)
+        // calculation, not the O(N) drawing.
         ctx.fillStyle = color;
         for (let i = 0; i < particles.length; i++) {
             ctx.fillRect(particles[i].x-R, particles[i].y-R, R*2, R*2);
         }
     }
-    draw(yellow, "yellow");
-    draw(red, "red");
-    draw(green, "green");
+    draw(yellow, "hsl(60, 100%, 75%)");
+    draw(red, "hsl(0, 100%, 50%)");
+    draw(green, "hsl(110, 100%, 40%)");
+    draw(blue, "hsl(230, 100%, 70%)");
     requestAnimationFrame(update);
 }
 
 let yellow = [];
 let red = [];
 let green = [];
+let blue = [];
 createSliders();
 ruleset3();
 update();

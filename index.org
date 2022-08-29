@@ -7,8 +7,8 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
 <figure>
   <canvas id="output" width="1000" height="1000" />
   <figcaption>Particle simulation</figcaption>
-  <div id="sliders"/>
   <button onclick="randomParameters()" ondblclick="randomParameters()">Randomize</button>
+  <div id="sliders"/>
 </figure>
 #+end_export
 
