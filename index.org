@@ -8,12 +8,15 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
   <canvas id="output" width="1000" height="1000" />
   <figcaption>Particle simulation</figcaption>
   <div id="sliders"/>
+  <button onclick="randomParameters()" ondblclick="randomParameters()">Randomize</button>
 </figure>
 #+end_export
 
 #+begin_export html
 <style>
-  label { display: block; }
+  #sliders { text-align: left; }
+  label { display: grid; grid-template-columns: 10em 1fr 3em; }
+  label span, output { font-family: monospace; text-align: right; }
 </style>
 
 <x:footer>

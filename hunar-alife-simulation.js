@@ -14,39 +14,57 @@ canvas.height = HEIGHT;
 const ctx = canvas.getContext('2d');
 
 const sliderRanges = { // should be [low, initial, high]
-    red_count: [0, 200, 3000],
-    green_count: [0, 200, 3000],
-    yellow_count: [0, 200, 3000],
+    red_count:     [0, 200, 1000],
+    green_count:   [0, 200, 1000],
+    yellow_count:  [0, 200, 1000],
+    green_green:   [-100, 0, 100],
+    green_red:     [-100, 0, 100],
+    green_yellow:  [-100, 0, 100],
+    red_red:       [-100, 0, 100],
+    red_green:     [-100, 0, 100],
+    red_yellow:    [-100, 0, 100],
+    yellow_yellow: [-100, 0, 100],
+    yellow_green:  [-100, 0, 100],
+    yellow_red:    [-100, 0, 100],
 };
-let sliders = {}; // pointers to the <input> elements
+let sliders = {}; // pointers to the <input> and <output> elements
 let parameters = {}; // set from sliders
 
 function createSliders() {
     const sliderDiv = document.querySelector("#sliders");
     for (let [key, [lo, v, hi]] of Object.entries(sliderRanges)) {
         const label = document.createElement("label");
-        const slider = document.createElement("input");
-        slider.setAttribute('type', "range");
-        slider.setAttribute('min', lo);
-        slider.setAttribute('max', hi);
-        slider.setAttribute('value', v);
-        label.append(key, slider);
+        const span = document.createElement("span");
+        const input = document.createElement("input");
+        const output = document.createElement("output");
+        input.setAttribute('type', "range");
+        input.setAttribute('min', lo);
+        input.setAttribute('max', hi);
+        input.setAttribute('value', v);
+        span.append(key);
+        label.append(span, input, output);
         sliderDiv.append(label);
         
         parameters[key] = v;
-        sliders[key] = slider;
+        sliders[key] = [input, output];
+    }
+}
+
+function setSliders(values) {
+    for (let [key, [input, _]] of Object.entries(sliders)) {
+        input.value = values[key] ?? 0;
     }
 }
 
 function readSliders() {
-    for (let [key, slider] of Object.entries(sliders)) {
-        parameters[key] = slider.valueAsNumber;
+    for (let [key, [input, output]] of Object.entries(sliders)) {
+        parameters[key] = input.valueAsNumber;
+        output.innerText = input.value;
     }
 }
 
-function randomPos(lo, hi) {
-    return Math.random() * (hi-lo) + lo;
-}
+function randomPos(lo, hi) { return Math.random() * (hi-lo) + lo; }
+function randomInt(lo, hi) { return Math.floor(randomPos(lo, hi)); }
 
 function number(particles, count) {
     particles.splice(count);
@@ -93,33 +111,65 @@ function rule(particles1, particles2, G) {
 }
 
 function ruleset1() {
-    number(yellow, 200);
-    number(red, 200);
-    number(green, 200);
-    rule(green, green, 32)
-    rule(green, red, 17)
-    rule(green, yellow, -34)
-    rule(red, red, 10)
-    rule(red, green, 34)
-    rule(yellow, yellow, -15)
-    rule(yellow, green, 20)
+    setSliders({
+        yellow_count  : 200,
+        red_count     : 200,
+        green_count   : 200,
+        yellow_yellow : -15,
+        yellow_green  : 20,
+        red_red       : 10,
+        red_green     : 34,
+        green_yellow  : -34,
+        green_red     : 17,
+        green_green   : 32,
+    });
 }
 
 function ruleset2() {
-    number(yellow, 200);
-    number(red, 200);
-    number(green, 200);
-    rule(red, red, -10);
-    rule(yellow, red, -15);
-    rule(green, green, 70);
-    rule(green, red, 20);
-    rule(red, green, 10);
-    rule(yellow, yellow, -1);
+    setSliders({
+        yellow_count  : 200,
+        red_count     : 200,
+        green_count   : 200,
+        yellow_yellow : -1,
+        yellow_red    : -15,
+        red_red       : -10,
+        red_green     : 10,
+        green_red     : 20,
+        green_green   : 70,
+    });
+}
+
+function randomParameters() {
+    setSliders({
+        yellow_count:  randomInt(100, 400),
+        red_count:     randomInt(100, 400),
+        green_count:   randomInt(100, 400),
+        yellow_yellow: randomInt(-50, 50),
+        yellow_red:    randomInt(-50, 50),
+        yellow_green:  randomInt(-50, 50),
+        red_yellow:    randomInt(-50, 50),
+        red_red:       randomInt(-50, 50),
+        red_green:     randomInt(-50, 50),
+        green_yellow:  randomInt(-50, 50),
+        green_red:     randomInt(-50, 50),
+        green_green:   randomInt(-50, 50),
+    });
 }
 
 function update() {
     readSliders();
-    ruleset1();
+    number(yellow, parameters.yellow_count);
+    number(red, parameters.red_count);
+    number(green, parameters.green_count);
+    rule(yellow , yellow, parameters.yellow_yellow);
+    rule(yellow , red,    parameters.yellow_red);
+    rule(yellow , green,  parameters.yellow_green);
+    rule(red    , yellow, parameters.red_yellow);
+    rule(red    , red,    parameters.red_red);
+    rule(red    , green,  parameters.red_green);
+    rule(green  , yellow, parameters.green_yellow);
+    rule(green  , red,    parameters.green_red);
+    rule(green  , green,  parameters.green_green);
     
     const R = 2;
     ctx.fillStyle = "black";
@@ -141,4 +191,5 @@ let yellow = [];
 let red = [];
 let green = [];
 createSliders();
+ruleset1();
 update();
