@@ -60,13 +60,10 @@ function rule(particles1, particles2, g) {
         a.x += a.vx;
         a.y += a.vy;
 
-        // NOTE: this isn't sufficient, I think. Hunar limited the
-        // force distance to 80 (which is quite short, as the forces
-        // *do* have an effect past that distance) so this seems like
-        // it works, but you can check how many particles are within
-        // range, and see that it's not keeping them in the box.
-        if (a.x <= 0 || a.x >= WIDTH-1) a.vx *= -1;
-        if (a.y <= 0 || a.y >= HEIGHT-1) a.vy *= -1;
+        if (a.x < 0) { a.x = -a.x; a.vx *= -1; }
+        if (a.x >= WIDTH) { a.x = 2*WIDTH - a.x; a.vx *= -1; }
+        if (a.y < 0) { a.y = -a.y; a.vy *= -1; }
+        if (a.y >= HEIGHT) { a.y = 2*HEIGHT - a.y; a.vy *= -1; }
     }
 }
 
@@ -100,16 +97,17 @@ function update() {
     document.querySelector("#in-range-yellow").innerText = yellow.filter(inRange).length;
     document.querySelector("#in-range-red").innerText = red.filter(inRange).length;
     document.querySelector("#in-range-green").innerText = green.filter(inRange).length;
-    
+
+    const R = 2;
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
     for (let i = 0; i < particles.length; i++) {
-        draw(particles[i].x, particles[i].y, particles[i].color, 5);
+        draw(particles[i].x-R, particles[i].y-R, particles[i].color, R*2);
     }
     requestAnimationFrame(update);
 }
 
-let yellow = create(1000, "yellow")
+let yellow = create(200, "yellow")
 let red = create(200, "red")
 let green = create(200, "green")
 update();
