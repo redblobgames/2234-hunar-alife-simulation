@@ -7,13 +7,18 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
 <figure>
   <canvas id="output" width="1000" height="1000" />
   <figcaption>Particle simulation</figcaption>
+  <div id="sliders"/>
 </figure>
 #+end_export
 
 #+begin_export html
+<style>
+  label { display: block; }
+</style>
+
 <x:footer>
   <script src="hunar-alife-simulation.js"></script>
   Created 27 Aug 2022; &#160;
-  <!-- hhmts start -->Last modified: 27 Aug 2022<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 28 Aug 2022<!-- hhmts end -->
 </x:footer>
 #+end_export

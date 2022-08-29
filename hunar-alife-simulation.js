@@ -13,6 +13,37 @@ canvas.width = WIDTH;
 canvas.height = HEIGHT;
 const ctx = canvas.getContext('2d');
 
+const sliderRanges = { // should be [low, initial, high]
+    red_count: [0, 200, 3000],
+    green_count: [0, 200, 3000],
+    yellow_count: [0, 200, 3000],
+};
+let sliders = {}; // pointers to the <input> elements
+let parameters = {}; // set from sliders
+
+function createSliders() {
+    const sliderDiv = document.querySelector("#sliders");
+    for (let [key, [lo, v, hi]] of Object.entries(sliderRanges)) {
+        const label = document.createElement("label");
+        const slider = document.createElement("input");
+        slider.setAttribute('type', "range");
+        slider.setAttribute('min', lo);
+        slider.setAttribute('max', hi);
+        slider.setAttribute('value', v);
+        label.append(key, slider);
+        sliderDiv.append(label);
+        
+        parameters[key] = v;
+        sliders[key] = slider;
+    }
+}
+
+function readSliders() {
+    for (let [key, slider] of Object.entries(sliders)) {
+        parameters[key] = slider.valueAsNumber;
+    }
+}
+
 function randomPos(lo, hi) {
     return Math.random() * (hi-lo) + lo;
 }
@@ -30,7 +61,8 @@ function number(particles, count) {
     }
 }
 
-function rule(particles1, particles2, g) {
+function rule(particles1, particles2, G) {
+    let g = -G/100;
     const MAX_DISTANCE = 80;
     for (let i = 0; i < particles1.length; i++) {
         let fx = 0,
@@ -41,7 +73,7 @@ function rule(particles1, particles2, g) {
             let dx = a.x - b.x;
             let dy = a.y - b.y;
             let d = Math.sqrt(dx*dx + dy*dy);
-            if (0 < d && d < MAX_DISTANCE) {
+            if (0 < d && d < MAX_DISTANCE) { // TODO: could use a spatial hash to speed this up
                 let F = g * 1/d;
                 fx += F * dx;
                 fy += F * dy;
@@ -64,28 +96,29 @@ function ruleset1() {
     number(yellow, 200);
     number(red, 200);
     number(green, 200);
-    rule(green, green, -0.32)
-    rule(green, red, -0.17)
-    rule(green, yellow, 0.34)
-    rule(red, red, -0.10)
-    rule(red, green, -0.34)
-    rule(yellow, yellow, 0.15)
-    rule(yellow, green, -0.20)
+    rule(green, green, 32)
+    rule(green, red, 17)
+    rule(green, yellow, -34)
+    rule(red, red, 10)
+    rule(red, green, 34)
+    rule(yellow, yellow, -15)
+    rule(yellow, green, 20)
 }
 
 function ruleset2() {
     number(yellow, 200);
     number(red, 200);
     number(green, 200);
-    rule(red, red, 0.1);
-    rule(yellow, red, 0.15);
-    rule(green, green, -0.7);
-    rule(green, red, -0.2);
-    rule(red, green, -0.1);
-    rule(yellow, yellow, 0.01);
+    rule(red, red, -10);
+    rule(yellow, red, -15);
+    rule(green, green, 70);
+    rule(green, red, 20);
+    rule(red, green, 10);
+    rule(yellow, yellow, -1);
 }
 
 function update() {
+    readSliders();
     ruleset1();
     
     const R = 2;
@@ -107,4 +140,5 @@ function update() {
 let yellow = [];
 let red = [];
 let green = [];
+createSliders();
 update();
