@@ -13,6 +13,7 @@ const MARGIN = 50; // start particles out this far from the walls
 const COLORS = ['red', 'yellow', 'green', 'blue'];
 let parameters = {
     friction: 50,
+    exponent: 100,
     counts: [200, 200, 200, 200],
     matrix: [0, 0, 0, 0,
              0, 0, 0, 0,
@@ -23,7 +24,7 @@ let parameters = {
 let uiUpdaters = []; // functions to call when we set parameters outside of the ui
 function createSliders() {
     const sliderDiv = document.querySelector("#sliders");
-    function slider(name, obj, key, lo, hi, init) {
+    function slider(name, obj, key, lo, hi, digits=0) {
         const label = document.createElement("label");
         const span = document.createElement("span");
         const input = document.createElement("input");
@@ -37,23 +38,24 @@ function createSliders() {
 
         function updateUi() {
             input.value = obj[key];
-            output.innerText = input.value;
+            output.innerText = (obj[key] / Math.pow(10, digits)).toFixed(digits);
         }
            
         function handleUiEvent() {
             obj[key] = input.valueAsNumber;
-            output.innerText = input.value;
+            output.innerText = (obj[key] / Math.pow(10, digits)).toFixed(digits);
         }
         input.addEventListener('input', handleUiEvent);
         uiUpdaters.push(updateUi);
         updateUi();
     }
 
-    slider("Friction", parameters, 'friction', 0,  100,  50);
-    slider("Red",      parameters.counts, 0,   0, 1000, 200);
-    slider("Yellow",   parameters.counts, 1,   0, 1000, 200);
-    slider("Green",    parameters.counts, 2,   0, 1000, 200);
-    slider("Blue",     parameters.counts, 3,   0, 1000, 200);
+    slider("Friction", parameters, 'friction', 0,  100, 2);
+    slider("Exponent", parameters, 'exponent', -50, 200, 2);
+    slider("#Red",     parameters.counts, 0,   0, 1000);
+    slider("#Yellow",  parameters.counts, 1,   0, 1000);
+    slider("#Green",   parameters.counts, 2,   0, 1000);
+    slider("#Blue",    parameters.counts, 3,   0, 1000);
     
     function div(innerHTML) {
         let el = document.createElement('div');
@@ -126,7 +128,8 @@ function setSliders(values) {
         let i = COLORS.indexOf(first),
             j = COLORS.indexOf(second);
         if (second === 'count') { parameters.counts[i] = values[key]; }
-        if (i >= 0 && j >= 0) { parameters.matrix[i * COLORS.length + j] = values[key]; }
+        else if (i >= 0 && j >= 0) { parameters.matrix[i * COLORS.length + j] = values[key]; }
+        else { parameters[key] = values[key]; }
     }
     uiUpdaters.forEach((f) => f());
 }
@@ -147,7 +150,7 @@ function number(particles, count) {
     }
 }
 
-function rule(particles1, particles2, force, friction) {
+function rule(particles1, particles2, force, exponent, friction) {
     let g = -force/200;
     const MAX_DISTANCE = 80;
     for (let i = 0; i < particles1.length; i++) {
@@ -160,6 +163,7 @@ function rule(particles1, particles2, force, friction) {
             let dy = a.y - b.y;
             let d = Math.sqrt(dx*dx + dy*dy);
             if (0 < d && d < MAX_DISTANCE) { // TODO: could use a spatial hash to speed this up
+                d = Math.pow(d, exponent + 1);
                 let F = g * 1/d;
                 fx += F * dx;
                 fy += F * dy;
@@ -183,6 +187,7 @@ function rule(particles1, particles2, force, friction) {
 function ruleset1() {
     setSliders({
         friction      : 50,
+        exponent      : 0,
         yellow_count  : 200,
         red_count     : 200,
         green_count   : 200,
@@ -200,6 +205,7 @@ function ruleset1() {
 function ruleset2() {
     setSliders({
         friction      : 50,
+        exponent      : 0,
         yellow_count  : 200,
         red_count     : 200,
         green_count   : 200,
@@ -216,6 +222,7 @@ function ruleset2() {
 function ruleset3() {
     setSliders({
         friction      : 50,
+        exponent      : 0,
         yellow_count  : 450,
         red_count     : 200,
         green_count   : 300,
@@ -234,6 +241,7 @@ function ruleset3() {
         
 function randomParameters() {
     parameters.friction = randomInt(10, 90);
+    parameters.exponent = Math.round(120 * (randomPos(0, 1) ** 2)) - 10;
     for (let i = 0; i < parameters.counts.length; i++) { parameters.counts[i] = Math.floor(Math.sqrt(randomPos(10, 100000))); }
     for (let i = 0; i < parameters.matrix.length; i++) { parameters.matrix[i] = randomInt(-100, 100); }
     uiUpdaters.forEach((f) => f());
@@ -245,7 +253,10 @@ function simulate() {
         number(sets[i], parameters.counts[i]);
         for (let j = 0; j < 4; j++) {
             // NOTE: make sure ui direction and matrix (row vs column major) match
-            rule(sets[i], sets[j], parameters.matrix[4*i + j], parameters.friction / 100);
+            rule(sets[i], sets[j],
+                 parameters.matrix[4*i + j],
+                 parameters.exponent/100,
+                 parameters.friction / 100);
         }
     }
 }
