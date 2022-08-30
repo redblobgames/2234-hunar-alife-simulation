@@ -10,35 +10,20 @@ const WIDTH = 500,
       HEIGHT = 500;
 const MARGIN = 50; // start particles out this far from the walls
 
-const sliderRanges = { // should be [low, initial, high]
-    friction:      [10, 50, 100],
-    yellow_count:  [0, 200, 1000],
-    red_count:     [0, 200, 1000],
-    green_count:   [0, 200, 1000],
-    blue_count:    [0, 200, 1000],
-    yellow_yellow: [-100, 0, 100],
-    yellow_red:    [-100, 0, 100],
-    yellow_green:  [-100, 0, 100],
-    yellow_blue:   [-100, 0, 100],
-    red_yellow:    [-100, 0, 100],
-    red_red:       [-100, 0, 100],
-    red_green:     [-100, 0, 100],
-    red_blue:      [-100, 0, 100],
-    green_yellow:  [-100, 0, 100],
-    green_red:     [-100, 0, 100],
-    green_green:   [-100, 0, 100],
-    green_blue:    [-100, 0, 100],
-    blue_yellow:   [-100, 0, 100],
-    blue_red:      [-100, 0, 100],
-    blue_green:    [-100, 0, 100],
-    blue_blue:     [-100, 0, 100],
+const COLORS = ['red', 'yellow', 'green', 'blue'];
+let parameters = {
+    friction: 50,
+    counts: [200, 200, 200, 200],
+    matrix: [0, 0, 0, 0,
+             0, 0, 0, 0,
+             0, 0, 0, 0,
+             0, 0, 0, 0],
 };
-let sliders = {}; // pointers to the <input> and <output> elements
-let parameters = {}; // set from sliders
 
+let uiUpdaters = []; // functions to call when we set parameters outside of the ui
 function createSliders() {
     const sliderDiv = document.querySelector("#sliders");
-    for (let [key, [lo, v, hi]] of Object.entries(sliderRanges)) {
+    function slider(name, obj, key, lo, hi, init) {
         const label = document.createElement("label");
         const span = document.createElement("span");
         const input = document.createElement("input");
@@ -46,27 +31,104 @@ function createSliders() {
         input.setAttribute('type', "range");
         input.setAttribute('min', lo);
         input.setAttribute('max', hi);
-        input.setAttribute('value', v);
-        span.append(key);
+        span.append(name);
         label.append(span, input, output);
         sliderDiv.append(label);
-        
-        parameters[key] = v;
-        sliders[key] = [input, output];
+
+        function updateUi() {
+            input.value = obj[key];
+            output.innerText = input.value;
+        }
+           
+        function handleUiEvent() {
+            obj[key] = input.valueAsNumber;
+            output.innerText = input.value;
+        }
+        input.addEventListener('input', handleUiEvent);
+        uiUpdaters.push(updateUi);
+        updateUi();
     }
+
+    slider("Friction", parameters, 'friction', 0,  100,  50);
+    slider("Red",      parameters.counts, 0,   0, 1000, 200);
+    slider("Yellow",   parameters.counts, 1,   0, 1000, 200);
+    slider("Green",    parameters.counts, 2,   0, 1000, 200);
+    slider("Blue",     parameters.counts, 3,   0, 1000, 200);
+    
+    function div(innerHTML) {
+        let el = document.createElement('div');
+        el.innerHTML = innerHTML;
+        return el;
+    }
+    
+    const colorNames = ["Red", "Yel", "Grn", "Blu"];
+    const els = [];
+    els.push(div(""));
+    for (let col = 0; col < colorNames.length; col++) {
+        els.push(div("→" + colorNames[col]));
+    }
+    for (let row = 0; row < COLORS.length; row++) {
+        els.push(div(colorNames[row] + "→"));
+        for (let col = 0; col < COLORS.length; col++) {
+            let matrixIndex = row * COLORS.length + col;
+            let el = document.createElement('input');
+            el.setAttribute('type', "number");
+            el.setAttribute('size', "3");
+            el.setAttribute('min', "-100");
+            el.setAttribute('max', "100");
+            el.style.width = "100%";
+            el.style.height = "100%";
+            el.style.color = "white";
+            el.style.cursor = "ew-resize";
+            el.style.userSelect = "none";
+
+            // Dragging up/right on this box should change the value
+            let dragging = null;
+            el.addEventListener('pointerdown', (event) => {
+                if (dragging) return;
+                dragging = {x: event.x, y: event.y, initialValue: parameters.matrix[matrixIndex]};
+                event.target.setPointerCapture(event.pointerId);
+            });
+            el.addEventListener('pointerup', (event) => {
+                dragging = null;
+            });
+            el.addEventListener('pointermove', (event) => {
+                if (dragging) {
+                    let dx = event.x - dragging.x,
+                        dy = event.y - dragging.y;
+                    let newValue = dragging.initialValue + dx - dy;
+                    if (newValue < -100) newValue = -100;
+                    if (newValue > 100) newValue = 100;
+                    parameters.matrix[matrixIndex] = Math.round(newValue);
+                    updateUi();
+                }
+            });
+            function updateUi() {
+                let value = parameters.matrix[matrixIndex];
+                el.value = value;
+                let hue = value < 0? 300 : 30;
+                let sat = Math.floor(5 * Math.sqrt(Math.abs(value))); // non-linear to make low values more sensitive
+                let val = 25 + Math.floor(Math.abs(value) / 2);
+                el.style.backgroundColor = `hsl(${hue}, ${sat}%, ${val}%)`;
+            }
+            uiUpdaters.push(updateUi);
+            els.push(el);
+            updateUi();
+        }
+    }
+    document.querySelector("#matrix").append(...els);
 }
 
 function setSliders(values) {
-    for (let [key, [input, _]] of Object.entries(sliders)) {
-        input.value = values[key] ?? 0;
+    // Transitioning to matrix value:
+    for (let key of Object.keys(values)) {
+        let [first, second] = key.split('_');
+        let i = COLORS.indexOf(first),
+            j = COLORS.indexOf(second);
+        if (second === 'count') { parameters.counts[i] = values[key]; }
+        if (i >= 0 && j >= 0) { parameters.matrix[i * COLORS.length + j] = values[key]; }
     }
-}
-
-function readSliders() {
-    for (let [key, [input, output]] of Object.entries(sliders)) {
-        parameters[key] = input.valueAsNumber;
-        output.innerText = input.value;
-    }
+    uiUpdaters.forEach((f) => f());
 }
 
 function randomPos(lo, hi) { return Math.random() * (hi-lo) + lo; }
@@ -85,9 +147,8 @@ function number(particles, count) {
     }
 }
 
-function rule(particles1, particles2, G) {
-    const friction = parameters.friction / 100;
-    let g = -G/200;
+function rule(particles1, particles2, force, friction) {
+    let g = -force/200;
     const MAX_DISTANCE = 80;
     for (let i = 0; i < particles1.length; i++) {
         let fx = 0,
@@ -172,36 +233,21 @@ function ruleset3() {
 }
         
 function randomParameters() {
-    for (let [key, [input, _]] of Object.entries(sliders)) {
-        let value = randomInt(sliderRanges[key][0], sliderRanges[key][2]);
-        // special cases, pushing towards values I think are better:
-        if (key.endsWith('count')) value = Math.floor(Math.sqrt(randomPos(10, 100000)));
-        input.value = value;
-    }
+    parameters.friction = randomInt(10, 90);
+    for (let i = 0; i < parameters.counts.length; i++) { parameters.counts[i] = Math.floor(Math.sqrt(randomPos(10, 100000))); }
+    for (let i = 0; i < parameters.matrix.length; i++) { parameters.matrix[i] = randomInt(-100, 100); }
+    uiUpdaters.forEach((f) => f());
 }
 
 function simulate() {
-    readSliders();
-    number(yellow, parameters.yellow_count);
-    number(red,    parameters.red_count);
-    number(green,  parameters.green_count);
-    number(blue,   parameters.blue_count);
-    rule(yellow , yellow, parameters.yellow_yellow);
-    rule(yellow , red,    parameters.yellow_red);
-    rule(yellow , green,  parameters.yellow_green);
-    rule(yellow , blue,   parameters.yellow_blue);
-    rule(red    , yellow, parameters.red_yellow);
-    rule(red    , red,    parameters.red_red);
-    rule(red    , green,  parameters.red_green);
-    rule(red    , blue,   parameters.red_blue);
-    rule(green  , yellow, parameters.green_yellow);
-    rule(green  , red,    parameters.green_red);
-    rule(green  , green,  parameters.green_green);
-    rule(green  , blue,   parameters.green_blue);
-    rule(blue   , yellow, parameters.blue_yellow);
-    rule(blue   , red,    parameters.blue_red);
-    rule(blue   , green,  parameters.blue_green);
-    rule(blue   , blue,   parameters.blue_blue);
+    let sets = [red, yellow, green, blue];
+    for (let i = 0; i < 4; i++) {
+        number(sets[i], parameters.counts[i]);
+        for (let j = 0; j < 4; j++) {
+            // NOTE: make sure ui direction and matrix (row vs column major) match
+            rule(sets[i], sets[j], parameters.matrix[4*i + j], parameters.friction / 100);
+        }
+    }
 }
 
 function update() {

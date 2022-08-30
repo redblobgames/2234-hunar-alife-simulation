@@ -4,17 +4,29 @@
 I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video about a simple particle simulation]] and wanted to follow their instructions to recreate it.
 
 #+begin_export html
-<figure>
+<figure class="w-full">
   <canvas id="output" width="1000" height="1000" />
   <figcaption>Particle simulation</figcaption>
   <button onclick="randomParameters()" ondblclick="randomParameters()">Randomize</button>
-  <div id="sliders"/>
+  <div>
+  <div class="inline-block"><div id="matrix"/></div>
+  <div class="inline-block"><div id="sliders"/></div>
+  </div>
 </figure>
 #+end_export
 
 #+begin_export html
 <style>
+  .inline-block { display: inline-block; vertical-align: top; }
   #sliders { text-align: left; }
+  #matrix { display: grid; grid-template-columns: 4em repeat(4, 3em); grid-template-rows: 1.5em repeat(4, 3em); }
+  #matrix input[type=number] {
+    padding: 0.5em;
+    -moz-appearance: textfield;
+  }
+  #matrix input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
   label { display: grid; grid-template-columns: 10em 1fr 3em; }
   label span, output { font-family: monospace; text-align: right; }
 </style>
@@ -24,6 +36,6 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
   <script src="draw-canvas.js"></script>
 
   Created 27 Aug 2022; &#160;
-  <!-- hhmts start -->Last modified: 29 Aug 2022<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 30 Aug 2022<!-- hhmts end -->
 </x:footer>
 #+end_export
