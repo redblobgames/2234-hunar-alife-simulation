@@ -91,7 +91,7 @@ function createSliders() {
                 dragging = {x: event.x, y: event.y, initialValue: parameters.matrix[matrixIndex]};
                 event.target.setPointerCapture(event.pointerId);
             });
-            el.addEventListener('pointerup', (event) => {
+            el.addEventListener('pointerup', (_event) => {
                 dragging = null;
             });
             el.addEventListener('pointermove', (event) => {
@@ -242,7 +242,10 @@ function ruleset3() {
 function randomParameters() {
     parameters.friction = randomInt(10, 90);
     parameters.exponent = Math.round(120 * (randomPos(0, 1) ** 2)) - 10;
-    for (let i = 0; i < parameters.counts.length; i++) { parameters.counts[i] = Math.floor(Math.sqrt(randomPos(10, 100000))); }
+    parameters.counts[0] = Math.floor(Math.sqrt(randomPos(10, 20000)));
+    parameters.counts[1] = Math.floor(Math.sqrt(randomPos(100, 600000)));
+    parameters.counts[2] = Math.floor(Math.sqrt(randomPos(10, 50000)));
+    parameters.counts[3] = Math.floor(Math.sqrt(randomPos(50, 200000)));
     for (let i = 0; i < parameters.matrix.length; i++) { parameters.matrix[i] = randomInt(-100, 100); }
     uiUpdaters.forEach((f) => f());
 }
