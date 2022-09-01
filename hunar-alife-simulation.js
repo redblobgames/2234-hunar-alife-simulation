@@ -152,6 +152,7 @@ function number(particles, count) {
 
 function rule(particles1, particles2, force, exponent, friction) {
     let g = -force/200;
+    const DISTANCE_SCALE = 15;
     const MAX_DISTANCE = 80;
     for (let i = 0; i < particles1.length; i++) {
         let fx = 0,
@@ -162,8 +163,8 @@ function rule(particles1, particles2, force, exponent, friction) {
             let dx = a.x - b.x;
             let dy = a.y - b.y;
             let d = Math.sqrt(dx*dx + dy*dy);
-            if (0 < d && d < MAX_DISTANCE) { // TODO: could use a spatial hash to speed this up
-                d = Math.pow(d, exponent + 1);
+            if (0 < d && d < MAX_DISTANCE) {
+                d = DISTANCE_SCALE * Math.pow(d/DISTANCE_SCALE, exponent + 1);
                 let F = g * 1/d;
                 fx += F * dx;
                 fy += F * dy;
