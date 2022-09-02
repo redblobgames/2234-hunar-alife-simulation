@@ -21,7 +21,15 @@ let parameters = {
              0, 0, 0, 0],
 };
 
-let uiUpdaters = []; // functions to call when we set parameters outside of the ui
+//////////////////////////////////////////////////////////////////////
+// ui to control parameters
+
+let _uiUpdaters = []; // functions to call when we set parameters outside of the ui
+function updateUi() {
+    for (let f of _uiUpdaters) { f(); }
+    setUrlFromState();
+}
+
 function createSliders() {
     const sliderDiv = document.querySelector("#sliders");
     function slider(name, obj, key, lo, hi, digits=0) {
@@ -36,7 +44,7 @@ function createSliders() {
         label.append(span, input, output);
         sliderDiv.append(label);
 
-        function updateUi() {
+        function updateThisSlider() {
             input.value = obj[key];
             output.innerText = (obj[key] / Math.pow(10, digits)).toFixed(digits);
         }
@@ -46,8 +54,7 @@ function createSliders() {
             output.innerText = (obj[key] / Math.pow(10, digits)).toFixed(digits);
         }
         input.addEventListener('input', handleUiEvent);
-        uiUpdaters.push(updateUi);
-        updateUi();
+        _uiUpdaters.push(updateThisSlider);
     }
 
     slider("Friction", parameters, 'friction', 0,  100, 2);
@@ -105,7 +112,7 @@ function createSliders() {
                     updateUi();
                 }
             });
-            function updateUi() {
+            function updateThisSlider() {
                 let value = parameters.matrix[matrixIndex];
                 el.value = value;
                 let hue = value < 0? 300 : 30;
@@ -113,9 +120,8 @@ function createSliders() {
                 let val = 25 + Math.floor(Math.abs(value) / 2);
                 el.style.backgroundColor = `hsl(${hue}, ${sat}%, ${val}%)`;
             }
-            uiUpdaters.push(updateUi);
+            _uiUpdaters.push(updateThisSlider);
             els.push(el);
-            updateUi();
         }
     }
     document.querySelector("#matrix").append(...els);
@@ -131,8 +137,52 @@ function setSliders(values) {
         else if (i >= 0 && j >= 0) { parameters.matrix[i * COLORS.length + j] = values[key]; }
         else { parameters[key] = values[key]; }
     }
-    uiUpdaters.forEach((f) => f());
+    updateUi();
 }
+
+
+//////////////////////////////////////////////////////////////////////
+// url to control parameters
+
+let _setUrlFromStateTimeout = null;
+function _setUrlFromState() {
+    _setUrlFromStateTimeout = null;
+    let fragment = [
+        `friction=${parameters.friction}`,
+        `exponent=${parameters.exponent}`,
+        `counts=${parameters.counts}`,
+        `matrix=${parameters.matrix}`,
+    ].join("&");
+
+    let url = window.location.pathname + "#" + fragment;
+    window.history.replaceState({}, null, url);
+}
+function setUrlFromState() {
+    // Rate limit the url update because some browsers (like Safari
+    // iOS) throw an error if you change the url too quickly.
+    if (_setUrlFromStateTimeout === null) {
+        _setUrlFromStateTimeout = setTimeout(_setUrlFromState, 500);
+    }
+}
+
+
+function getStateFromUrl() {
+    let params = new URLSearchParams(window.location.hash.slice(1));
+    for (const [key, value] of params) {
+        switch(key) {
+          case 'friction': parameters.friction = parseFloat(value); break;
+          case 'exponent': parameters.exponent = parseFloat(value); break;
+          case 'counts': parameters.counts = value.split(',').map(parseFloat); break;
+          case 'matrix': parameters.matrix = value.split(',').map(parseFloat); break;
+        }
+    }
+    updateUi();
+}
+window.addEventListener('hashchange', getStateFromUrl);
+
+
+//////////////////////////////////////////////////////////////////////
+// simulation
 
 function randomPos(lo, hi) { return Math.random() * (hi-lo) + lo; }
 function randomInt(lo, hi) { return Math.floor(randomPos(lo, hi)); }
@@ -248,7 +298,7 @@ function randomParameters() {
     parameters.counts[2] = Math.floor(Math.sqrt(randomPos(10, 50000)));
     parameters.counts[3] = Math.floor(Math.sqrt(randomPos(50, 200000)));
     for (let i = 0; i < parameters.matrix.length; i++) { parameters.matrix[i] = randomInt(-100, 100); }
-    uiUpdaters.forEach((f) => f());
+    updateUi();
 }
 
 function simulate() {
@@ -265,6 +315,10 @@ function simulate() {
     }
 }
 
+
+//////////////////////////////////////////////////////////////////////
+// main loop
+
 function update() {
     simulate();
     draw();
@@ -275,6 +329,7 @@ function init() {
     initializeOutput(WIDTH, HEIGHT);
     createSliders();
     ruleset3();
+    getStateFromUrl();
     update();
 }
 
@@ -284,4 +339,3 @@ let green = [];
 let blue = [];
 
 window.onload = init;
-
