@@ -1,7 +1,7 @@
 #+title: Hunar Alife Simulation
 #+date: <2022-08-27 Sat>
 
-I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video about a simple particle simulation]] and wanted to follow their instructions to recreate it.
+I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video about a simple particle simulation]] and wanted to follow their tutorial to recreate it.
 
 #+begin_export html
 <figure class="w-full">
@@ -26,7 +26,7 @@ Thoughts about Hunar's video:
 
 Despite these issues, it's so *joyful* that I had a lot of fun playing with this. It's a great introduction to this type of particle simulation!
 
-The video has inspired lots of contributions to the original code, so [[https://github.com/hunar4321/life_code/][check it out on github]]. My page was inspired by the video but I can't keep up with all the open source contributions the original gets. :-)
+The video has inspired lots of contributions to the original code, so [[https://github.com/hunar4321/life_code/][check it out Hunar's project github]]. My page was inspired by the video but I developed it in a different direction, and [[https://github.com/redblobgames/2234-hunar-alife-simulation/][my code is also on github]].
 
 #+begin_export html
 <style>

@@ -1,0 +1,3 @@
+[[http://unmaintained.tech/badge.svg]]
+
+I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video about a simple particle simulation]] and wanted to follow their tutorial to recreate it, on [[https://www.redblobgames.com/x/2234-hunar-alife-simulation/][my site]]. Hunar also has [[https://github.com/hunar4321/life_code/][open source c++ and javascript code on github]], but my code is based on the tutorial so it differs from the code on their github.
