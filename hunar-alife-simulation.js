@@ -59,10 +59,10 @@ function createSliders() {
 
     slider("Friction", parameters, 'friction', 0,  100, 2);
     slider("Exponent", parameters, 'exponent', -50, 200, 2);
-    slider("#Red",     parameters.counts, 0,   0, 1000);
-    slider("#Yellow",  parameters.counts, 1,   0, 1000);
-    slider("#Green",   parameters.counts, 2,   0, 1000);
-    slider("#Blue",    parameters.counts, 3,   0, 1000);
+    slider("#Red",     parameters.counts, 0,   0, MAX_COUNT);
+    slider("#Yellow",  parameters.counts, 1,   0, MAX_COUNT);
+    slider("#Green",   parameters.counts, 2,   0, MAX_COUNT);
+    slider("#Blue",    parameters.counts, 3,   0, MAX_COUNT);
     
     function div(innerHTML) {
         let el = document.createElement('div');
@@ -157,9 +157,10 @@ function setUrlFromState() {
 
 
 function getStateFromUrl() {
-    function updateArray(maxLength, array, values) {
-        array.splice(0, values.length, ...values);
-        array.splice(maxLength);
+    function updateArray(array, values) {
+        for (let i = 0; i < array.length && i < values.length; i++) {
+            array[i] = values[i] ?? 0;
+        }
     }
     
     let params = new URLSearchParams(window.location.hash.slice(1));
@@ -167,8 +168,8 @@ function getStateFromUrl() {
         switch(key) {
           case 'friction': parameters.friction = parseFloat(value); break;
           case 'exponent': parameters.exponent = parseFloat(value); break;
-          case 'counts': updateArray(4, parameters.counts, value.split(',').map(parseFloat)); break;
-          case 'matrix': updateArray(16, parameters.matrix, value.split(',').map(parseFloat)); break;
+          case 'counts': updateArray(parameters.counts, value.split(',').map(parseFloat)); break;
+          case 'matrix': updateArray(parameters.matrix, value.split(',').map(parseFloat)); break;
         }
     }
     updateUi();
@@ -179,54 +180,60 @@ window.addEventListener('hashchange', getStateFromUrl);
 //////////////////////////////////////////////////////////////////////
 // simulation
 
+// Float32Array storage for particles, can be used with webgl
+//    array[4*i   ] is x
+//    array[4*i+1] is y
+//    array[4*i+2] is vx
+//    array[4*i+3] is vy
+const MAX_COUNT = 1000;
+let particles = COLORS.map(() => new Float32Array(MAX_COUNT * 4));
+
 function randomPos(lo, hi) { return Math.random() * (hi-lo) + lo; }
 function randomInt(lo, hi) { return Math.floor(randomPos(lo, hi)); }
 
-function number(particles, count) {
-    particles.splice(count);
-    for (let i = particles.length; i < count; i++) {
-        let p = {
-            x: randomPos(MARGIN, WIDTH-MARGIN),
-            y: randomPos(MARGIN, HEIGHT-MARGIN),
-            vx: 0,
-            vy: 0,
-        };
-        particles.push(p);
-    }
-}
-
-function rule(particles1, particles2, force, exponent, friction) {
+function rule(receivers, receiverCount, senders, senderCount, force, exponent, friction) {
     let g = -force/200;
     const DISTANCE_SCALE = 15;
-    const MAX_DISTANCE = 80;
-    for (let i = 0; i < particles1.length; i++) {
+    const DISTANCE_LIMIT = 80;
+    const distanceSquaredLimit = DISTANCE_LIMIT**2;
+    for (let i = 0; i < receiverCount; i++) {
+        let receiverX  = receivers[4*i  ],
+            receiverY  = receivers[4*i+1],
+            receiverVx = receivers[4*i+2],
+            receiverVy = receivers[4*i+3];
         let fx = 0,
             fy = 0;
-        let a = particles1[i];
-        for (let j = 0; j < particles2.length; j++) {
-            let b = particles2[j];
-            let dx = a.x - b.x;
-            let dy = a.y - b.y;
-            let d = Math.sqrt(dx*dx + dy*dy);
-            if (0 < d && d < MAX_DISTANCE) {
-                d = DISTANCE_SCALE * Math.pow(d/DISTANCE_SCALE, exponent + 1);
-                let F = g * 1/d;
+        for (let j = 0; j < senderCount; j++) {
+            let senderX = senders[4*j  ],
+                senderY = senders[4*j+1];
+            let dx = receiverX - senderX;
+            let dy = receiverY - senderY;
+            let distanceSquared = dx*dx + dy*dy;
+            if (0 < distanceSquared && distanceSquared < distanceSquaredLimit) {
+                let distance = Math.sqrt(distanceSquared);
+                distance = DISTANCE_SCALE * Math.pow(distance/DISTANCE_SCALE, exponent + 1);
+                let F = g * 1/distance;
                 fx += F * dx;
                 fy += F * dy;
             }
         }
 
-        a.vx *= 1 - friction;
-        a.vy *= 1 - friction;
-        a.vx += fx;
-        a.vy += fy
-        a.x += a.vx;
-        a.y += a.vy;
+        receiverVx *= 1 - friction;
+        receiverVy *= 1 - friction;
+        receiverVx += fx;
+        receiverVy += fy
+        receiverX += receiverVx;
+        receiverY += receiverVy;
 
-        if (a.x < 0) { a.x = -a.x; a.vx *= -1; }
-        if (a.x >= WIDTH) { a.x = 2*WIDTH - a.x; a.vx *= -1; }
-        if (a.y < 0) { a.y = -a.y; a.vy *= -1; }
-        if (a.y >= HEIGHT) { a.y = 2*HEIGHT - a.y; a.vy *= -1; }
+        if (receiverX < 0) { receiverX = -receiverX; receiverVx *= -1; }
+        if (receiverX >= WIDTH) { receiverX = 2*WIDTH - receiverX; receiverVx *= -1; }
+        if (receiverY < 0) { receiverY = -receiverY; receiverVy *= -1; }
+        if (receiverY >= HEIGHT) { receiverY = 2*HEIGHT - receiverY; receiverVy *= -1; }
+
+        receivers[4*i  ] = receiverX;
+        receivers[4*i+1] = receiverY;
+        receivers[4*i+2] = receiverVx;
+        receivers[4*i+3] = receiverVy;
     }
 }
 
@@ -242,13 +249,12 @@ function randomParameters() {
 }
 
 function simulate() {
-    let sets = [red, yellow, green, blue];
-    for (let i = 0; i < 4; i++) {
-        number(sets[i], parameters.counts[i]);
-        for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < COLORS.length; i++) {
+        for (let j = 0; j < COLORS.length; j++) {
             // NOTE: make sure ui direction and matrix (row vs column major) match
-            rule(sets[i], sets[j],
-                 parameters.matrix[4*i + j],
+            rule(particles[i], parameters.counts[i],
+                 particles[j], parameters.counts[j],
+                 parameters.matrix[COLORS.length*i + j],
                  parameters.exponent/100,
                  parameters.friction / 100);
         }
@@ -266,15 +272,20 @@ function update() {
 }
 
 function init() {
+    for (let color = 0; color < COLORS.length; color++) {
+        for (let i = 0; i < MAX_COUNT; i++) {
+            let index = 4 * i;
+            particles[color][index  ] = randomPos(MARGIN, WIDTH-MARGIN);
+            particles[color][index+1] = randomPos(MARGIN, HEIGHT-MARGIN);
+            particles[color][index+2] = 0;
+            particles[color][index+3] = 0;
+        }
+    }
+    
     initializeOutput(WIDTH, HEIGHT);
     createSliders();
     getStateFromUrl();
     update();
 }
-
-let yellow = [];
-let red = [];
-let green = [];
-let blue = [];
 
 window.onload = init;
