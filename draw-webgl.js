@@ -69,6 +69,10 @@ function initializeOutput(width, height) {
     gl.disable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE);
+    // TODO: gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA) is what I
+    // normally would use but for SRC_ALPHA, ONE looks nicer, and ONE,
+    // ONE looks even nicer. Figure out how to fix the fragment shader
+    // to make ONE_MINUS_SRC_ALPHA look right.
 }
 
 let buffer = new Float32Array(2000);

@@ -9,8 +9,8 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
   <figcaption>Particle simulation</figcaption>
   <button onclick="randomParameters()" ondblclick="randomParameters()">Randomize</button>
   <div>
-  <div class="inline-block"><div id="matrix"/></div>
-  <div class="inline-block"><div id="sliders"/></div>
+  <div class="inline-block">Edit:<div id="matrix"/></div>
+  <div class="inline-block">Edit:<div id="sliders"/></div>
   </div>
 </figure>
 #+end_export
@@ -25,6 +25,8 @@ Thoughts about Hunar's video:
 - The Euler integration is unstable, and the time steps are too large. I considered fixing these, but I think some of the cool effects are really simulation artifacts and not the results of the physics, so fixing them would make it less fun!
 
 Despite these issues, it's so *joyful* that I had a lot of fun playing with this. It's a great introduction to this type of particle simulation!
+
+The video has inspired lots of contributions to the original code, so [[https://github.com/hunar4321/life_code/][check it out on github]]. My page was inspired by the video but I can't keep up with all the open source contributions the original gets. :-)
 
 #+begin_export html
 <style>
@@ -47,6 +49,6 @@ Despite these issues, it's so *joyful* that I had a lot of fun playing with this
   <script src="draw-webgl.js"></script>
 
   Created 27 Aug 2022; &#160;
-  <!-- hhmts start -->Last modified: 31 Aug 2022<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 02 Sep 2022<!-- hhmts end -->
 </x:footer>
 #+end_export

@@ -51,7 +51,7 @@ function createSliders() {
            
         function handleUiEvent() {
             obj[key] = input.valueAsNumber;
-            output.innerText = (obj[key] / Math.pow(10, digits)).toFixed(digits);
+            updateUi();
         }
         input.addEventListener('input', handleUiEvent);
         _uiUpdaters.push(updateThisSlider);
@@ -95,6 +95,8 @@ function createSliders() {
             let dragging = null;
             el.addEventListener('pointerdown', (event) => {
                 if (dragging) return;
+                event.preventDefault();
+                event.stopPropagation();
                 dragging = {x: event.x, y: event.y, initialValue: parameters.matrix[matrixIndex]};
                 event.target.setPointerCapture(event.pointerId);
             });
@@ -103,6 +105,8 @@ function createSliders() {
             });
             el.addEventListener('pointermove', (event) => {
                 if (dragging) {
+                    event.preventDefault();
+                    event.stopPropagation();
                     let dx = event.x - dragging.x,
                         dy = event.y - dragging.y;
                     let newValue = dragging.initialValue + dx - dy;
@@ -172,8 +176,8 @@ function getStateFromUrl() {
         switch(key) {
           case 'friction': parameters.friction = parseFloat(value); break;
           case 'exponent': parameters.exponent = parseFloat(value); break;
-          case 'counts': parameters.counts = value.split(',').map(parseFloat); break;
-          case 'matrix': parameters.matrix = value.split(',').map(parseFloat); break;
+          case 'counts': parameters.counts.splice(4, value.split(',').map(parseFloat)); break;
+          case 'matrix': parameters.matrix.splice(16, value.split(',').map(parseFloat)); break;
         }
     }
     updateUi();
