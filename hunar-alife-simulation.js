@@ -14,10 +14,10 @@ const COLORS = ['red', 'yellow', 'green', 'blue'];
 let parameters = {
     friction: 50,
     exponent: 100,
-    counts: [200, 200, 200, 200],
-    matrix: [0, 0, 0, 0,
-             0, 0, 0, 0,
-             0, 0, 0, 0,
+    counts: [200, 450, 300, 0],
+    matrix: [15, -20, 30, 0,
+             -10, -2, 10, 0,
+             -15, 25, -40, 0,
              0, 0, 0, 0],
 };
 
@@ -131,20 +131,6 @@ function createSliders() {
     document.querySelector("#matrix").append(...els);
 }
 
-function setSliders(values) {
-    // Transitioning to matrix value:
-    for (let key of Object.keys(values)) {
-        let [first, second] = key.split('_');
-        let i = COLORS.indexOf(first),
-            j = COLORS.indexOf(second);
-        if (second === 'count') { parameters.counts[i] = values[key]; }
-        else if (i >= 0 && j >= 0) { parameters.matrix[i * COLORS.length + j] = values[key]; }
-        else { parameters[key] = values[key]; }
-    }
-    updateUi();
-}
-
-
 //////////////////////////////////////////////////////////////////////
 // url to control parameters
 
@@ -171,13 +157,18 @@ function setUrlFromState() {
 
 
 function getStateFromUrl() {
+    function updateArray(maxLength, array, values) {
+        array.splice(0, values.length, ...values);
+        array.splice(maxLength);
+    }
+    
     let params = new URLSearchParams(window.location.hash.slice(1));
     for (const [key, value] of params) {
         switch(key) {
           case 'friction': parameters.friction = parseFloat(value); break;
           case 'exponent': parameters.exponent = parseFloat(value); break;
-          case 'counts': parameters.counts.splice(4, value.split(',').map(parseFloat)); break;
-          case 'matrix': parameters.matrix.splice(16, value.split(',').map(parseFloat)); break;
+          case 'counts': updateArray(4, parameters.counts, value.split(',').map(parseFloat)); break;
+          case 'matrix': updateArray(16, parameters.matrix, value.split(',').map(parseFloat)); break;
         }
     }
     updateUi();
@@ -239,61 +230,6 @@ function rule(particles1, particles2, force, exponent, friction) {
     }
 }
 
-function ruleset1() {
-    setSliders({
-        friction      : 50,
-        exponent      : 0,
-        yellow_count  : 200,
-        red_count     : 200,
-        green_count   : 200,
-        blue_count    : 0,
-        yellow_yellow : -15,
-        yellow_green  : 20,
-        red_red       : 10,
-        red_green     : 34,
-        green_yellow  : -34,
-        green_red     : 17,
-        green_green   : 32,
-    });
-}
-
-function ruleset2() {
-    setSliders({
-        friction      : 50,
-        exponent      : 0,
-        yellow_count  : 200,
-        red_count     : 200,
-        green_count   : 200,
-        blue_count    : 0,
-        yellow_yellow : -1,
-        yellow_red    : -15,
-        red_red       : -10,
-        red_green     : 10,
-        green_red     : 20,
-        green_green   : 70,
-    });
-}
-
-function ruleset3() {
-    setSliders({
-        friction      : 50,
-        exponent      : 0,
-        yellow_count  : 450,
-        red_count     : 200,
-        green_count   : 300,
-        blue_count    : 0,
-        yellow_yellow : -2,
-        yellow_red    : -10,
-        yellow_green  : 10,
-        red_red       : 15,
-        red_yellow    : -20,
-        red_green     : 30,
-        green_yellow  : 25,
-        green_red     : -15,
-        green_green   : -40,
-    });
-}
-        
 function randomParameters() {
     parameters.friction = randomInt(10, 90);
     parameters.exponent = Math.round(120 * (randomPos(0, 1) ** 2)) - 10;
@@ -332,7 +268,6 @@ function update() {
 function init() {
     initializeOutput(WIDTH, HEIGHT);
     createSliders();
-    ruleset3();
     getStateFromUrl();
     update();
 }
