@@ -15,6 +15,8 @@ I really enjoyed [[https://www.youtube.com/watch?v=0Kx4Y9TVMGg][Hunar's video ab
 </figure>
 #+end_export
 
+I store the parameters in the url so that you can share the url with the current set of parameters, like [[https://www.redblobgames.com/x/2234-hunar-alife-simulation/#friction=100&exponent=36&counts=769,692,636,866&matrix=-100,-49,100,100,61,-100,-44,95,100,68,-100,84,60,56,50,-99][this example]] or [[https://www.redblobgames.com/x/2234-hunar-alife-simulation/#friction=61&exponent=14&counts=78,562,89,273&matrix=19,-45,-55,5,-86,-44,-24,-76,44,-18,-79,65,72,-54,-15,-13][this example]].
+
 Thoughts about Hunar's video:
 
 - It's *joyful*. I watched it without thinking about "should it be =let= or =const=?" or "should it be a typed array?" or "what is the right module structure" or "what is the best way to set up the build system?" It gets right to the point — let's implement a simulation!
@@ -49,6 +51,6 @@ The video has inspired lots of contributions to the original code, so [[https://
   <script src="draw-webgl.js"></script>
 
   Created 27 Aug 2022; &#160;
-  <!-- hhmts start -->Last modified: 02 Sep 2022<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 07 Sep 2022<!-- hhmts end -->
 </x:footer>
 #+end_export
