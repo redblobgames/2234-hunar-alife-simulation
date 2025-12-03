@@ -30,6 +30,7 @@ Despite these issues, it's so *joyful* that I had a lot of fun playing with this
 
 The video has inspired lots of contributions to the original code, so [[https://github.com/hunar4321/life_code/][check it out Hunar's project github]]. My page was inspired by the video but I developed it in a different direction, and [[https://github.com/redblobgames/2234-hunar-alife-simulation/][my code is also on github]].
 
+Other people have made a-life simulations as well, unrelated to Hunar's project. See https://lisyarus.github.io/blog/posts/particle-life-simulation-in-browser-using-webgpu.html for one.
 #+begin_export html
 <style>
   .inline-block { display: inline-block; vertical-align: top; }
@@ -51,6 +52,6 @@ The video has inspired lots of contributions to the original code, so [[https://
   <script src="draw-webgl.js"></script>
 
   Created 27 Aug 2022; &#160;
-  <!-- hhmts start -->Last modified: 02 Jan 2025<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 29 May 2025<!-- hhmts end -->
 </x:footer>
 #+end_export
