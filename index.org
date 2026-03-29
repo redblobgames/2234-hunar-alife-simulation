@@ -51,7 +51,7 @@ Other people have made a-life simulations as well, unrelated to Hunar's project.
   <script src="hunar-alife-simulation.js"></script>
   <script src="draw-webgl.js"></script>
 
-  Created 27 Aug 2022; &#160;
+  Created 27 Aug 2022;
   <!-- hhmts start -->Last modified: 29 May 2025<!-- hhmts end -->
 </x:footer>
 #+end_export
