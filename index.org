@@ -25,12 +25,15 @@ Thoughts about Hunar's video:
 - The simulation writes into the input array instead of having a separate output array (double buffering), which means the order of the particles affects the output. This is ok with small timesteps but this simulation uses large timesteps. [[[https://github.com/hunar4321/life_code/issues/18][github issue]]]
 - The bounds checking is insufficient for keeping particles inside the box. I fixed this in my code. [[[https://github.com/hunar4321/life_code/issues/4][github issue]]]
 - The Euler integration is unstable, and the time steps are too large. I considered fixing these, but I think some of the cool effects are really simulation artifacts and not the results of the physics, so fixing them would make it less fun!
+- Also see [[https://www.youtube.com/watch?v=qWbDl5TNpCI][Flow-Lenia]]
+
 
 Despite these issues, it's so *joyful* that I had a lot of fun playing with this. It's a great introduction to this type of particle simulation!
 
 The video has inspired lots of contributions to the original code, so [[https://github.com/hunar4321/life_code/][check it out Hunar's project github]]. My page was inspired by the video but I developed it in a different direction, and [[https://github.com/redblobgames/2234-hunar-alife-simulation/][my code is also on github]].
 
 Other people have made a-life simulations as well, unrelated to Hunar's project. See https://lisyarus.github.io/blog/posts/particle-life-simulation-in-browser-using-webgpu.html for one.
+
 #+begin_export html
 <style>
   .inline-block { display: inline-block; vertical-align: top; }
@@ -52,6 +55,6 @@ Other people have made a-life simulations as well, unrelated to Hunar's project.
   <script src="draw-webgl.js"></script>
 
   Created 27 Aug 2022;
-  <!-- hhmts start -->Last modified: 29 May 2025<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 21 May 2026<!-- hhmts end -->
 </x:footer>
 #+end_export
